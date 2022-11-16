@@ -2,6 +2,7 @@ import { receiveFile } from '../src/parser.mjs';
 import { translateToSwedish } from '../src/translator.mjs';
 import { Pef, Head, Body, Volume, Section, Page, Row } from '../src/pef.mjs';
 import { Outputter, OutputFormats } from '../src/outputter.mjs';
+import { diagnose } from '../src/diagnosticator.js';
 import fs from 'fs';
 
 test('tests an increment, if this fails JEST is configured incorrectly', () => {
@@ -16,6 +17,7 @@ test('tests if the Parser returns correct data', () => {
     expect(PEF.head.meta.title).not.toBeNull();
     expect(PEF.head.meta.title).toBe("Butterfly Test Pattern");
     expect(PEF.head.meta.creator).toBe("Joel Håkansson");
+    expect(PEF.body.volumes[0].sections[0].pages[0].rows[3]).toBe("⠀⠀⠏⠉⠉⠉⠉⠉⠉⠩⠉⠿⠉⠍⠉⠉⠉⠉⠉⠉⠹");
 });
 
 test('tests if the Translator returns correct data', () => {
@@ -47,4 +49,15 @@ test('tests if the Outputter returns correct data', () => {
         "</div>"
     );
     expect(textBeginsWithCorrectData && textEndsWithCorrectData).toBe(true)
+});
+
+test('tests if the Diagnosticer returns correct-ish data', () => {
+    // Currently, none of the example files that are on the PEF specification
+    // have a summary. If you own PEF files feel free to plug your own files in
+    // and make sure the expect is set correctly.
+
+    var data = fs.readFileSync("test/examples/butterfly.pef", 'utf-8');
+    var PEF = receiveFile(data);
+    expect(PEF).toBeDefined();
+    expect(diagnose(PEF)).toBe(false);
 });
